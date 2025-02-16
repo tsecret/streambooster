@@ -68,7 +68,7 @@ def main():
 
   print("Current balance", balance_element.text)
 
-  checkNSFW()
+  checkNSFW(driver)
 
   while True:
     sleep(5)
