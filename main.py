@@ -24,20 +24,25 @@ def getOptions():
 
   return chrome_options
 
-# todo
-def selectQuality(driver: webdriver.Chrome):
-  driver.switch_to.frame(driver.find_element(By.TAG_NAME, "iframe"))
+def checkNSFW(driver: webdriver.Chrome):
 
-  driver.find_elements()
+  twitch_frame = driver.find_element(By.TAG_NAME, "iframe")
+  driver.switch_to.frame(twitch_frame)
 
-  # driver.find_element(By.CLASS_NAME, "ScCoreButton-sc-ocjdkq-0 fYnRik ScButtonIcon-sc-9yap0r-0 dOOPAe").click()
-
-  # for label in driver.find_elements(By.TAG_NAME, "label"):
-  #   print(label.text)
+  # Skip NSFW popup
+  buttons = driver.find_elements(By.TAG_NAME, "button")
+  for button in buttons:
+    if button.text == 'Start Watching':
+      button.click()
 
   driver.switch_to.default_content()
 
 def checkForInactiveStream(driver: webdriver.Chrome):
+  captcha_button = driver.find_element(By.ID, "g-recaptcha-span")
+  if captcha_button and captcha_button.is_displayed():
+    captcha_button.click()
+    sleep(5)
+
   credits_per_minute = float(driver.find_element(By.ID, 'credits-per-minute').text)
   if credits_per_minute == 0:
     driver.refresh()
@@ -63,9 +68,12 @@ def main():
 
   print("Current balance", balance_element.text)
 
+  checkNSFW()
+
   while True:
     sleep(5)
 
+    checkNSFW(driver)
     checkForInactiveStream(driver)
 
     pass
